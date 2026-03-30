@@ -1,3 +1,49 @@
+// --- STATS BASE ---
+const stats = {
+    usernameScans: 0,
+    domainScans: 0,
+    ipLookups: 0,
+    dnsLookups: 0,
+    whoisLookups: 0,
+    asnLookups: 0,
+    reverseLookups: 0,
+    emailAnalyses: 0,
+    portScans: 0,
+    exifAnalyses: 0,
+    fileMetaAnalyses: 0,
+    unshorts: 0,
+    hashCalcs: 0,
+    headerAnalyses: 0,
+    footprints: 0,
+    reportsGenerated: 0
+};
+
+function updateStats() {
+    const div = document.getElementById("stats-results");
+    if (!div) return;
+    div.innerHTML = `
+        <div class="result-item">
+            <strong>Stats:</strong><br>
+            Username scans: ${stats.usernameScans}<br>
+            Domain scans: ${stats.domainScans}<br>
+            IP lookups: ${stats.ipLookups}<br>
+            DNS lookups: ${stats.dnsLookups}<br>
+            WHOIS lookups: ${stats.whoisLookups}<br>
+            ASN lookups: ${stats.asnLookups}<br>
+            Reverse DNS: ${stats.reverseLookups}<br>
+            Email analyses: ${stats.emailAnalyses}<br>
+            Port scans: ${stats.portScans}<br>
+            EXIF analyses: ${stats.exifAnalyses}<br>
+            File metadata: ${stats.fileMetaAnalyses}<br>
+            Unshort: ${stats.unshorts}<br>
+            Hash calcs: ${stats.hashCalcs}<br>
+            Header analyses: ${stats.headerAnalyses}<br>
+            Footprints: ${stats.footprints}<br>
+            Reports: ${stats.reportsGenerated}<br>
+        </div>
+    `;
+}
+
 // --- USERNAME SCAN ---
 const sites = {
     "Instagram": "https://www.instagram.com/",
@@ -19,6 +65,9 @@ async function scan() {
         return;
     }
 
+    stats.usernameScans++;
+    updateStats();
+
     resultsDiv.innerHTML = "<p>⏳ Scansione...</p>";
     let output = "";
 
@@ -39,7 +88,7 @@ async function scan() {
     resultsDiv.innerHTML = output;
 }
 
-// --- DOMINIO (placeholder) ---
+// --- DOMINIO ---
 async function scanDomain() {
     const domain = document.getElementById("domainInput").value.trim();
     const div = document.getElementById("domain-results");
@@ -49,10 +98,13 @@ async function scanDomain() {
         return;
     }
 
-    div.innerHTML = `<div class="result-item">Dominio: ${domain}<br>(Qui puoi aggiungere WHOIS/API esterne)</div>`;
+    stats.domainScans++;
+    updateStats();
+
+    div.innerHTML = `<div class="result-item">Dominio: ${domain}<br>(Qui puoi aggiungere WHOIS/API esterne lato server)</div>`;
 }
 
-// --- IP LOOKUP (API pubblica semplice) ---
+// --- IP LOOKUP ---
 async function lookupIP() {
     const ip = document.getElementById("ipInput").value.trim();
     const div = document.getElementById("ip-results");
@@ -61,6 +113,9 @@ async function lookupIP() {
         div.innerHTML = "<p>Inserisci un IP valido.</p>";
         return;
     }
+
+    stats.ipLookups++;
+    updateStats();
 
     div.innerHTML = "<p>⏳ Ricerca IP...</p>";
 
@@ -81,7 +136,7 @@ async function lookupIP() {
     }
 }
 
-// --- DNS LOOKUP (Google DNS API) ---
+// --- DNS LOOKUP ---
 async function lookupDNS() {
     const domain = document.getElementById("dnsInput").value.trim();
     const div = document.getElementById("dns-results");
@@ -90,6 +145,9 @@ async function lookupDNS() {
         div.innerHTML = "<p>Inserisci un dominio valido.</p>";
         return;
     }
+
+    stats.dnsLookups++;
+    updateStats();
 
     div.innerHTML = "<p>⏳ Ricerca DNS...</p>";
 
@@ -114,6 +172,150 @@ async function lookupDNS() {
     }
 }
 
+// --- WHOIS (placeholder/API client-side) ---
+async function lookupWHOIS() {
+    const domain = document.getElementById("whoisInput").value.trim();
+    const div = document.getElementById("whois-results");
+
+    if (!domain) {
+        div.innerHTML = "<p>Inserisci un dominio valido.</p>";
+        return;
+    }
+
+    stats.whoisLookups++;
+    updateStats();
+
+    div.innerHTML = "<p>⏳ WHOIS (demo)...</p>";
+
+    // Nota: WHOIS serio richiede server/proxy. Qui solo demo.
+    div.innerHTML = `
+        <div class="result-item">
+            <strong>Dominio:</strong> ${domain}<br>
+            <strong>Registrar:</strong> (richiede API lato server)<br>
+            <strong>Creation date:</strong> N/D<br>
+            <strong>Expiration date:</strong> N/D<br>
+            <strong>Nameserver:</strong> N/D<br>
+            <em>Per WHOIS completo serve backend o servizio esterno con CORS.</em>
+        </div>
+    `;
+}
+
+// --- ASN LOOKUP (demo) ---
+async function lookupASN() {
+    const ip = document.getElementById("asnInput").value.trim();
+    const div = document.getElementById("asn-results");
+
+    if (!ip) {
+        div.innerHTML = "<p>Inserisci un IP valido.</p>";
+        return;
+    }
+
+    stats.asnLookups++;
+    updateStats();
+
+    div.innerHTML = "<p>⏳ ASN Lookup...</p>";
+
+    try {
+        // Demo con ipapi (non sempre dà ASN)
+        const res = await fetch(`https://ipapi.co/${ip}/json/`);
+        const data = await res.json();
+
+        div.innerHTML = `
+            <div class="result-item">
+                <strong>IP:</strong> ${data.ip || ip}<br>
+                <strong>ASN:</strong> ${data.asn || "N/D"}<br>
+                <strong>Org:</strong> ${data.org || "N/D"}<br>
+                <strong>Paese:</strong> ${data.country_name || "N/D"}<br>
+            </div>
+        `;
+    } catch (e) {
+        div.innerHTML = "<p>Errore nella richiesta ASN.</p>";
+    }
+}
+
+// --- REVERSE DNS (demo via DNS PTR) ---
+async function lookupReverseDNS() {
+    const ip = document.getElementById("reverseInput").value.trim();
+    const div = document.getElementById("reverse-results");
+
+    if (!ip) {
+        div.innerHTML = "<p>Inserisci un IP valido.</p>";
+        return;
+    }
+
+    stats.reverseLookups++;
+    updateStats();
+
+    div.innerHTML = "<p>⏳ Reverse DNS...</p>";
+
+    // Reverse DNS serio richiede manipolare IP in PTR (in-addr.arpa), qui solo placeholder
+    div.innerHTML = `
+        <div class="result-item">
+            <strong>IP:</strong> ${ip}<br>
+            <strong>PTR:</strong> (Reverse DNS richiede API o server dedicato)<br>
+        </div>
+    `;
+}
+
+// --- EMAIL OSINT (base) ---
+function analyzeEmail() {
+    const email = document.getElementById("emailInput").value.trim();
+    const div = document.getElementById("email-results");
+
+    if (!email) {
+        div.innerHTML = "<p>Inserisci un'email.</p>";
+        return;
+    }
+
+    stats.emailAnalyses++;
+    updateStats();
+
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const valid = regex.test(email);
+    const domain = email.split("@")[1] || "N/D";
+
+    div.innerHTML = `
+        <div class="result-item">
+            <strong>Email:</strong> ${email}<br>
+            <strong>Valida sintatticamente:</strong> ${valid ? "Sì" : "No"}<br>
+            <strong>Dominio:</strong> ${domain}<br>
+            <em>Per MX, breach, ecc. servono API esterne.</em>
+        </div>
+    `;
+}
+
+// --- PORT SCANNER (HTTP/HTTPS demo) ---
+async function scanPorts() {
+    const host = document.getElementById("portsHostInput").value.trim();
+    const div = document.getElementById("ports-results");
+
+    if (!host) {
+        div.innerHTML = "<p>Inserisci un host (es. https://example.com).</p>";
+        return;
+    }
+
+    stats.portScans++;
+    updateStats();
+
+    div.innerHTML = "<p>⏳ Scansione porte (demo)...</p>";
+
+    const ports = [80, 443, 8080, 8443];
+    let output = "<div class='result-item'><strong>Risultati porte (HTTP-based):</strong><br>";
+
+    for (const port of ports) {
+        const url = host.replace(/\/+$/, "") + ":" + port;
+        try {
+            await fetch(url, { method: "GET", mode: "no-cors" });
+            output += `🟢 Porta ${port}: possibile risposta (no-cors)<br>`;
+        } catch {
+            output += `🔴 Porta ${port}: nessuna risposta (o bloccata)<br>`;
+        }
+    }
+
+    output += "<em>Limitato dal browser, per scan seri serve backend.</em></div>";
+    div.innerHTML = output;
+}
+
 // --- EXIF ---
 function analyzeImage() {
     const fileInput = document.getElementById("imageInput");
@@ -123,6 +325,9 @@ function analyzeImage() {
         resultsDiv.innerHTML = "<p>Carica un'immagine.</p>";
         return;
     }
+
+    stats.exifAnalyses++;
+    updateStats();
 
     const file = fileInput.files[0];
     resultsDiv.innerHTML = "<p>⏳ Analisi EXIF...</p>";
@@ -155,7 +360,32 @@ function analyzeImage() {
     reader.readAsArrayBuffer(fileInput.files[0]);
 }
 
-// --- UNSHORT (molto semplice, solo fetch HEAD/GET) ---
+// --- FILE META (demo) ---
+function analyzeFileMeta() {
+    const input = document.getElementById("fileMetaInput");
+    const div = document.getElementById("filemeta-results");
+
+    if (!input.files.length) {
+        div.innerHTML = "<p>Carica un file.</p>";
+        return;
+    }
+
+    stats.fileMetaAnalyses++;
+    updateStats();
+
+    const file = input.files[0];
+
+    div.innerHTML = `
+        <div class="result-item">
+            <strong>Nome file:</strong> ${file.name}<br>
+            <strong>Dimensione:</strong> ${file.size} bytes<br>
+            <strong>Tipo MIME:</strong> ${file.type || "N/D"}<br>
+            <em>Per metadati avanzati (PDF/DOCX) serve parsing lato client o server.</em>
+        </div>
+    `;
+}
+
+// --- UNSHORT ---
 async function unshortURL() {
     const url = document.getElementById("unshortInput").value.trim();
     const div = document.getElementById("unshort-results");
@@ -164,6 +394,9 @@ async function unshortURL() {
         div.innerHTML = "<p>Inserisci un URL.</p>";
         return;
     }
+
+    stats.unshorts++;
+    updateStats();
 
     div.innerHTML = "<p>⏳ Espansione URL...</p>";
 
@@ -180,7 +413,7 @@ async function unshortURL() {
     }
 }
 
-// --- HASH (SHA-256) ---
+// --- HASH ---
 async function calcHash() {
     const text = document.getElementById("hashInput").value;
     const div = document.getElementById("hash-results");
@@ -189,6 +422,9 @@ async function calcHash() {
         div.innerHTML = "<p>Inserisci del testo.</p>";
         return;
     }
+
+    stats.hashCalcs++;
+    updateStats();
 
     const encoder = new TextEncoder();
     const data = encoder.encode(text);
@@ -204,7 +440,7 @@ async function calcHash() {
     `;
 }
 
-// --- HEADERS (best effort, dipende da CORS) ---
+// --- HEADERS ---
 async function analyzeHeaders() {
     const url = document.getElementById("headersInput").value.trim();
     const div = document.getElementById("headers-results");
@@ -213,6 +449,9 @@ async function analyzeHeaders() {
         div.innerHTML = "<p>Inserisci un URL.</p>";
         return;
     }
+
+    stats.headerAnalyses++;
+    updateStats();
 
     div.innerHTML = "<p>⏳ Richiesta...</p>";
 
@@ -231,3 +470,70 @@ async function analyzeHeaders() {
     }
 }
 
+// --- FOOTPRINT (aggregato demo) ---
+async function generateFootprint() {
+    const domain = document.getElementById("footprintInput").value.trim();
+    const div = document.getElementById("footprint-results");
+
+    if (!domain) {
+        div.innerHTML = "<p>Inserisci un dominio.</p>";
+        return;
+    }
+
+    stats.footprints++;
+    updateStats();
+
+    div.innerHTML = "<p>⏳ Generazione footprint...</p>";
+
+    let output = `<div class="result-item"><strong>Footprint per ${domain}:</strong><br>`;
+
+    // DNS base
+    try {
+        const res = await fetch(`https://dns.google/resolve?name=${domain}`);
+        const data = await res.json();
+        output += "<br><strong>DNS:</strong><br>";
+        if (data.Answer) {
+            data.Answer.forEach(a => {
+                output += `${a.type} → ${a.data}<br>`;
+            });
+        } else {
+            output += "Nessuna risposta DNS.<br>";
+        }
+    } catch {
+        output += "<br>Errore DNS.<br>";
+    }
+
+    output += "<br><em>WHOIS, ASN, Reverse, ecc. possono essere integrati via backend.</em>";
+    output += "</div>";
+
+    div.innerHTML = output;
+}
+
+// --- REPORT (semplice aggregato HTML) ---
+function generateReport() {
+    const div = document.getElementById("report-results");
+
+    stats.reportsGenerated++;
+    updateStats();
+
+    const notes = document.getElementById("notesInput")?.value || "";
+
+    div.innerHTML = `
+        <div class="result-item">
+            <strong>Report OSINT (snapshot):</strong><br>
+            <em>Questo è un report base generato lato client.</em><br><br>
+            <strong>Note:</strong><br>
+            <pre>${notes || "Nessuna nota inserita."}</pre>
+            <br>
+            <strong>Stats attuali:</strong><br>
+            Username scans: ${stats.usernameScans}<br>
+            IP lookups: ${stats.ipLookups}<br>
+            DNS lookups: ${stats.dnsLookups}<br>
+            WHOIS lookups: ${stats.whoisLookups}<br>
+            ASN lookups: ${stats.asnLookups}<br>
+            EXIF analyses: ${stats.exifAnalyses}<br>
+            Unshort: ${stats.unshorts}<br>
+            Hash calcs: ${stats.hashCalcs}<br>
+        </div>
+    `;
+}

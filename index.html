@@ -13,11 +13,20 @@
             <a href="#domain">Dominio</a>
             <a href="#ip">IP</a>
             <a href="#dns">DNS</a>
+            <a href="#whois">WHOIS</a>
+            <a href="#asn">ASN</a>
+            <a href="#reverse">Reverse DNS</a>
+            <a href="#email">Email</a>
+            <a href="#ports">Porte</a>
             <a href="#exif">EXIF</a>
+            <a href="#filemeta">FileMeta</a>
             <a href="#unshort">Unshort</a>
             <a href="#hash">Hash</a>
             <a href="#headers">Headers</a>
+            <a href="#footprint">Footprint</a>
             <a href="#notes">Note</a>
+            <a href="#report">Report</a>
+            <a href="#stats">Stats</a>
         </div>
     </div>
 
@@ -32,7 +41,7 @@
     <!-- DOMINIO -->
     <section id="domain">
         <h2>Analisi Dominio</h2>
-        <input type="text" id="domainInput" placeholder="Inserisci dominio">
+        <input type="text" id="domainInput" placeholder="Inserisci dominio (es. google.com)">
         <button onclick="scanDomain()">Analizza</button>
         <div id="domain-results"></div>
     </section>
@@ -53,12 +62,60 @@
         <div id="dns-results"></div>
     </section>
 
+    <!-- WHOIS -->
+    <section id="whois">
+        <h2>WHOIS</h2>
+        <input type="text" id="whoisInput" placeholder="Inserisci dominio (es. google.com)">
+        <button onclick="lookupWHOIS()">Cerca WHOIS</button>
+        <div id="whois-results"></div>
+    </section>
+
+    <!-- ASN -->
+    <section id="asn">
+        <h2>ASN Lookup</h2>
+        <input type="text" id="asnInput" placeholder="Inserisci IP (es. 1.1.1.1)">
+        <button onclick="lookupASN()">Cerca ASN</button>
+        <div id="asn-results"></div>
+    </section>
+
+    <!-- REVERSE DNS -->
+    <section id="reverse">
+        <h2>Reverse DNS</h2>
+        <input type="text" id="reverseInput" placeholder="Inserisci IP (es. 1.1.1.1)">
+        <button onclick="lookupReverseDNS()">Cerca Reverse</button>
+        <div id="reverse-results"></div>
+    </section>
+
+    <!-- EMAIL -->
+    <section id="email">
+        <h2>Email OSINT</h2>
+        <input type="text" id="emailInput" placeholder="Inserisci email (es. test@example.com)">
+        <button onclick="analyzeEmail()">Analizza Email</button>
+        <div id="email-results"></div>
+    </section>
+
+    <!-- PORTE -->
+    <section id="ports">
+        <h2>Port Scanner (HTTP/HTTPS)</h2>
+        <input type="text" id="portsHostInput" placeholder="Inserisci host (es. https://example.com)">
+        <button onclick="scanPorts()">Scansiona Porte</button>
+        <div id="ports-results"></div>
+    </section>
+
     <!-- EXIF -->
     <section id="exif">
         <h2>Analisi EXIF</h2>
         <input type="file" id="imageInput" accept="image/*">
         <button onclick="analyzeImage()">Analizza immagine</button>
         <div id="image-results"></div>
+    </section>
+
+    <!-- FILE META -->
+    <section id="filemeta">
+        <h2>File Metadata (PDF/DOCX)</h2>
+        <input type="file" id="fileMetaInput">
+        <button onclick="analyzeFileMeta()">Analizza File</button>
+        <div id="filemeta-results"></div>
     </section>
 
     <!-- UNSHORT -->
@@ -85,13 +142,36 @@
         <div id="headers-results"></div>
     </section>
 
+    <!-- FOOTPRINT -->
+    <section id="footprint">
+        <h2>Footprint</h2>
+        <input type="text" id="footprintInput" placeholder="Inserisci dominio (es. google.com)">
+        <button onclick="generateFootprint()">Genera Footprint</button>
+        <div id="footprint-results"></div>
+    </section>
+
     <!-- NOTE -->
     <section id="notes">
         <h2>Note</h2>
         <textarea id="notesInput" placeholder="Annotazioni indagine..."></textarea>
     </section>
 
+    <!-- REPORT -->
+    <section id="report">
+        <h2>Report</h2>
+        <button onclick="generateReport()">Genera Report</button>
+        <div id="report-results"></div>
+    </section>
+
+    <!-- STATS -->
+    <section id="stats">
+        <h2>Stats</h2>
+        <div id="stats-results"></div>
+    </section>
+
     <script src="script.js"></script>
 </body>
 </html>
+
+
 
