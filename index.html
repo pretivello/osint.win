@@ -14,21 +14,14 @@
             <a href="#ip">IP</a>
             <a href="#dns">DNS</a>
             <a href="#exif">EXIF</a>
-            <a href="#reverse">Reverse</a>
-            <a href="#email">Email</a>
-            <a href="#footprint">Footprint</a>
-            <a href="#ports">Porte</a>
-            <a href="#filemeta">FileMeta</a>
             <a href="#unshort">Unshort</a>
             <a href="#hash">Hash</a>
             <a href="#headers">Headers</a>
             <a href="#notes">Note</a>
-            <a href="#stats">Stats</a>
-            <a href="#report">Report</a>
         </div>
     </div>
 
-    <!-- SEZIONE USERNAME -->
+    <!-- USERNAME -->
     <section id="username">
         <h2>Ricerca Username</h2>
         <input type="text" id="usernameInput" placeholder="Inserisci username">
@@ -36,7 +29,7 @@
         <div id="results"></div>
     </section>
 
-    <!-- SEZIONE DOMINIO -->
+    <!-- DOMINIO -->
     <section id="domain">
         <h2>Analisi Dominio</h2>
         <input type="text" id="domainInput" placeholder="Inserisci dominio">
@@ -44,7 +37,23 @@
         <div id="domain-results"></div>
     </section>
 
-    <!-- SEZIONE EXIF -->
+    <!-- IP -->
+    <section id="ip">
+        <h2>IP Lookup</h2>
+        <input type="text" id="ipInput" placeholder="Inserisci IP (es. 1.1.1.1)">
+        <button onclick="lookupIP()">Cerca IP</button>
+        <div id="ip-results"></div>
+    </section>
+
+    <!-- DNS -->
+    <section id="dns">
+        <h2>DNS Lookup</h2>
+        <input type="text" id="dnsInput" placeholder="Inserisci dominio (es. google.com)">
+        <button onclick="lookupDNS()">Cerca DNS</button>
+        <div id="dns-results"></div>
+    </section>
+
+    <!-- EXIF -->
     <section id="exif">
         <h2>Analisi EXIF</h2>
         <input type="file" id="imageInput" accept="image/*">
@@ -52,24 +61,37 @@
         <div id="image-results"></div>
     </section>
 
-    <!-- ALTRE SEZIONI (vuote per ora) -->
-    <section id="ip"><h2>IP</h2></section>
-    <section id="dns"><h2>DNS</h2></section>
-    <section id="reverse"><h2>Reverse</h2></section>
-    <section id="email"><h2>Email</h2></section>
-    <section id="footprint"><h2>Footprint</h2></section>
-    <section id="ports"><h2>Porte</h2></section>
-    <section id="filemeta"><h2>FileMeta</h2></section>
-    <section id="unshort"><h2>Unshort</h2></section>
-    <section id="hash"><h2>Hash</h2></section>
-    <section id="headers"><h2>Headers</h2></section>
-    <section id="notes"><h2>Note</h2></section>
-    <section id="stats"><h2>Stats</h2></section>
-    <section id="report"><h2>Report</h2></section>
+    <!-- UNSHORT -->
+    <section id="unshort">
+        <h2>Unshort URL</h2>
+        <input type="text" id="unshortInput" placeholder="Inserisci URL accorciato">
+        <button onclick="unshortURL()">Espandi</button>
+        <div id="unshort-results"></div>
+    </section>
+
+    <!-- HASH -->
+    <section id="hash">
+        <h2>Calcolo Hash</h2>
+        <textarea id="hashInput" placeholder="Inserisci testo o stringa"></textarea>
+        <button onclick="calcHash()">Calcola Hash</button>
+        <div id="hash-results"></div>
+    </section>
+
+    <!-- HEADERS -->
+    <section id="headers">
+        <h2>Analisi Headers HTTP</h2>
+        <input type="text" id="headersInput" placeholder="Inserisci URL (https://...)">
+        <button onclick="analyzeHeaders()">Analizza</button>
+        <div id="headers-results"></div>
+    </section>
+
+    <!-- NOTE -->
+    <section id="notes">
+        <h2>Note</h2>
+        <textarea id="notesInput" placeholder="Annotazioni indagine..."></textarea>
+    </section>
 
     <script src="script.js"></script>
 </body>
 </html>
-
-
 
