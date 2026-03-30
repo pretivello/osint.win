@@ -1,11 +1,14 @@
+// --- TEMA ---
 function toggleTheme() {
     document.body.classList.toggle("light");
 }
 
+// --- SCROLL ---
 function scrollToSection(id) {
     document.getElementById(id).scrollIntoView({ behavior: "smooth" });
 }
 
+// --- USERNAME SCAN ---
 const sites = {
     "Instagram": "https://www.instagram.com/",
     "TikTok": "https://www.tiktok.com/@",
@@ -46,6 +49,7 @@ async function scan() {
     resultsDiv.innerHTML = output;
 }
 
+// --- DOMINIO ---
 async function scanDomain() {
     const domain = document.getElementById("domainInput").value.trim();
     const div = document.getElementById("domain-results");
@@ -58,6 +62,7 @@ async function scanDomain() {
     div.innerHTML = `<div class="result-item">Dominio: ${domain}<br>(Aggiungi API WHOIS se vuoi)</div>`;
 }
 
+// --- EXIF ---
 function analyzeImage() {
     const fileInput = document.getElementById("imageInput");
     const resultsDiv = document.getElementById("image-results");
@@ -73,10 +78,28 @@ function analyzeImage() {
     const reader = new FileReader();
     reader.onload = function(e) {
         const view = new DataView(e.target.result);
+
         try {
             const exif = EXIF.readFromBinaryFile(view);
             if (!exif) {
                 resultsDiv.innerHTML = "<p>Nessun EXIF trovato.</p>";
                 return;
             }
-            let output = "<div class='result-item'><strong>
+
+            let output = "<div class='result-item'><strong>Metadata EXIF:</strong><br>";
+
+            for (let tag in exif) {
+                output += `<strong>${tag}:</strong> ${exif[tag]}<br>`;
+            }
+
+            output += "</div>";
+            resultsDiv.innerHTML = output;
+
+        } catch (error) {
+            resultsDiv.innerHTML = "<p>Errore nella lettura EXIF.</p>";
+        }
+    };
+
+    reader.readAsArrayBuffer(fileInput.files[0]);
+}
+
