@@ -1,4 +1,4 @@
-// --- STATS BASE ---
+// --- STATS ---
 const stats = {
     usernameScans: 0,
     domainScans: 0,
@@ -101,7 +101,7 @@ async function scanDomain() {
     stats.domainScans++;
     updateStats();
 
-    div.innerHTML = `<div class="result-item">Dominio: ${domain}<br>(Qui puoi aggiungere WHOIS/API esterne lato server)</div>`;
+    div.innerHTML = `<div class="result-item">Dominio: ${domain}<br>(Qui puoi aggiungere logica extra lato server)</div>`;
 }
 
 // --- IP LOOKUP ---
@@ -172,7 +172,7 @@ async function lookupDNS() {
     }
 }
 
-// --- WHOIS (placeholder/API client-side) ---
+// --- WHOIS (via RDAP, best effort) ---
 async function lookupWHOIS() {
     const domain = document.getElementById("whoisInput").value.trim();
     const div = document.getElementById("whois-results");
@@ -185,22 +185,39 @@ async function lookupWHOIS() {
     stats.whoisLookups++;
     updateStats();
 
-    div.innerHTML = "<p>⏳ WHOIS (demo)...</p>";
+    div.innerHTML = "<p>⏳ WHOIS (RDAP) in corso...</p>";
 
-    // Nota: WHOIS serio richiede server/proxy. Qui solo demo.
-    div.innerHTML = `
-        <div class="result-item">
-            <strong>Dominio:</strong> ${domain}<br>
-            <strong>Registrar:</strong> (richiede API lato server)<br>
-            <strong>Creation date:</strong> N/D<br>
-            <strong>Expiration date:</strong> N/D<br>
-            <strong>Nameserver:</strong> N/D<br>
-            <em>Per WHOIS completo serve backend o servizio esterno con CORS.</em>
-        </div>
-    `;
+    try {
+        const res = await fetch(`https://rdap.org/domain/${domain}`);
+        const data = await res.json();
+
+        const registrar = data.registrar ? data.registrar.name || data.registrar : "N/D";
+        const status = data.status ? data.status.join(", ") : "N/D";
+        const events = data.events || [];
+        const created = (events.find(e => e.eventAction === "registration") || {}).eventDate || "N/D";
+        const expires = (events.find(e => e.eventAction === "expiration") || {}).eventDate || "N/D";
+
+        div.innerHTML = `
+            <div class="result-item">
+                <strong>Dominio:</strong> ${domain}<br>
+                <strong>Registrar:</strong> ${registrar}<br>
+                <strong>Creato il:</strong> ${created}<br>
+                <strong>Scadenza:</strong> ${expires}<br>
+                <strong>Status:</strong> ${status}<br>
+                <em>Dati via RDAP (se disponibili, soggetti a CORS).</em>
+            </div>
+        `;
+    } catch (e) {
+        div.innerHTML = `
+            <div class="result-item">
+                <strong>Dominio:</strong> ${domain}<br>
+                <em>Impossibile recuperare WHOIS via browser (CORS / limitazioni). Per WHOIS completo serve backend.</em>
+            </div>
+        `;
+    }
 }
 
-// --- ASN LOOKUP (demo) ---
+// --- ASN LOOKUP ---
 async function lookupASN() {
     const ip = document.getElementById("asnInput").value.trim();
     const div = document.getElementById("asn-results");
@@ -216,7 +233,6 @@ async function lookupASN() {
     div.innerHTML = "<p>⏳ ASN Lookup...</p>";
 
     try {
-        // Demo con ipapi (non sempre dà ASN)
         const res = await fetch(`https://ipapi.co/${ip}/json/`);
         const data = await res.json();
 
@@ -233,7 +249,7 @@ async function lookupASN() {
     }
 }
 
-// --- REVERSE DNS (demo via DNS PTR) ---
+// --- REVERSE DNS (PTR via DNS Google) ---
 async function lookupReverseDNS() {
     const ip = document.getElementById("reverseInput").value.trim();
     const div = document.getElementById("reverse-results");
@@ -248,17 +264,43 @@ async function lookupReverseDNS() {
 
     div.innerHTML = "<p>⏳ Reverse DNS...</p>";
 
-    // Reverse DNS serio richiede manipolare IP in PTR (in-addr.arpa), qui solo placeholder
-    div.innerHTML = `
-        <div class="result-item">
-            <strong>IP:</strong> ${ip}<br>
-            <strong>PTR:</strong> (Reverse DNS richiede API o server dedicato)<br>
-        </div>
-    `;
+    const parts = ip.split(".").map(p => p.trim()).filter(Boolean);
+    if (parts.length !== 4) {
+        div.innerHTML = "<p>IP non valido.</p>";
+        return;
+    }
+
+    const ptrName = `${parts.reverse().join(".")}.in-addr.arpa`;
+
+    try {
+        const res = await fetch(`https://dns.google/resolve?name=${ptrName}&type=PTR`);
+        const data = await res.json();
+
+        if (!data.Answer) {
+            div.innerHTML = `
+                <div class="result-item">
+                    <strong>IP:</strong> ${ip}<br>
+                    <strong>PTR:</strong> Nessun record PTR trovato.<br>
+                </div>
+            `;
+            return;
+        }
+
+        const ptrs = data.Answer.map(a => a.data).join("<br>");
+
+        div.innerHTML = `
+            <div class="result-item">
+                <strong>IP:</strong> ${ip}<br>
+                <strong>PTR:</strong><br>${ptrs}
+            </div>
+        `;
+    } catch (e) {
+        div.innerHTML = "<p>Errore nella richiesta Reverse DNS.</p>";
+    }
 }
 
-// --- EMAIL OSINT (base) ---
-function analyzeEmail() {
+// --- EMAIL OSINT AVANZATO ---
+async function analyzeEmail() {
     const email = document.getElementById("emailInput").value.trim();
     const div = document.getElementById("email-results");
 
@@ -267,21 +309,111 @@ function analyzeEmail() {
         return;
     }
 
+    stats.emailAnalyses++;
+    updateStats();
+
+    div.innerHTML = "<p>⏳ Analisi email in corso...</p>";
+
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const valid = regex.test(email);
     const domain = email.split("@")[1] || "N/D";
+
+    async function dnsQuery(type) {
+        try {
+            const res = await fetch(`https://dns.google/resolve?name=${domain}&type=${type}`);
+            return await res.json();
+        } catch {
+            return null;
+        }
+    }
+
+    const mxData = await dnsQuery("MX");
+    let mxRecords = [];
+    if (mxData && mxData.Answer) {
+        mxRecords = mxData.Answer.map(a => a.data);
+    }
+
+    const txtData = await dnsQuery("TXT");
+    let txtRecords = [];
+    let spf = "Nessun record SPF.";
+    let dmarc = "Nessun record DMARC.";
+
+    if (txtData && txtData.Answer) {
+        txtRecords = txtData.Answer.map(a => a.data.replace(/"/g, ""));
+        spf = txtRecords.find(t => t.startsWith("v=spf1")) || "Nessun record SPF.";
+        dmarc = txtRecords.find(t => t.includes("v=DMARC1")) || "Nessun record DMARC.";
+    }
+
+    let reverseMX = "N/D";
+    if (mxRecords.length > 0) {
+        reverseMX = mxRecords[0].split(" ")[1] || mxRecords[0];
+    }
+
+    const disposableList = [
+        "tempmail", "10minutemail", "guerrillamail", "mailinator",
+        "trashmail", "yopmail", "dispostable", "fakeinbox"
+    ];
+    const isDisposable = disposableList.some(d => domain.includes(d));
+
+    let reputation = "Sconosciuta";
+    if (domain.includes("gmail") || domain.includes("outlook") || domain.includes("yahoo")) {
+        reputation = "Alta (provider affidabile)";
+    } else if (isDisposable) {
+        reputation = "Molto bassa (dominio usa-e-getta)";
+    } else if (!mxRecords.length) {
+        reputation = "Molto sospetta (nessun MX)";
+    } else {
+        reputation = "Normale";
+    }
+
+    const soaData = await dnsQuery("SOA");
+    let domainAge = "N/D";
+    if (soaData && soaData.Answer) {
+        const serial = soaData.Answer[0].data.split(" ")[2];
+        if (serial && serial.length === 10) {
+            const year = serial.substring(0, 4);
+            const month = serial.substring(4, 6);
+            const day = serial.substring(6, 8);
+            domainAge = `${day}/${month}/${year}`;
+        }
+    }
 
     div.innerHTML = `
         <div class="result-item">
             <strong>Email:</strong> ${email}<br>
             <strong>Valida sintatticamente:</strong> ${valid ? "Sì" : "No"}<br>
-            <strong>Dominio:</strong> ${domain}<br>
-            <em>Per MX, breach, ecc. servono API esterne.</em>
+            <strong>Dominio:</strong> ${domain}<br><br>
+
+            <strong>MX Records:</strong><br>
+            ${mxRecords.length ? mxRecords.join("<br>") : "Nessun MX"}<br><br>
+
+            <strong>SPF:</strong><br>
+            ${spf}<br><br>
+
+            <strong>DMARC:</strong><br>
+            ${dmarc}<br><br>
+
+            <strong>TXT Records:</strong><br>
+            ${txtRecords.length ? txtRecords.join("<br>") : "Nessun TXT"}<br><br>
+
+            <strong>Reverse MX (server → dominio):</strong><br>
+            ${reverseMX}<br><br>
+
+            <strong>Dominio usa-e-getta:</strong><br>
+            ${isDisposable ? "Sì (⚠️ sospetto)" : "No"}<br><br>
+
+            <strong>Età dominio (da SOA):</strong><br>
+            ${domainAge}<br><br>
+
+            <strong>Reputazione dominio:</strong><br>
+            ${reputation}<br><br>
+
+            <em>Analisi email completata.</em>
         </div>
     `;
 }
 
-// --- PORT SCANNER (HTTP/HTTPS demo) ---
+// --- PORT SCANNER (demo HTTP-based) ---
 async function scanPorts() {
     const host = document.getElementById("portsHostInput").value.trim();
     const div = document.getElementById("ports-results");
@@ -357,7 +489,7 @@ function analyzeImage() {
     reader.readAsArrayBuffer(fileInput.files[0]);
 }
 
-// --- FILE META (demo) ---
+// --- FILE META (base) ---
 function analyzeFileMeta() {
     const input = document.getElementById("fileMetaInput");
     const div = document.getElementById("filemeta-results");
@@ -377,7 +509,7 @@ function analyzeFileMeta() {
             <strong>Nome file:</strong> ${file.name}<br>
             <strong>Dimensione:</strong> ${file.size} bytes<br>
             <strong>Tipo MIME:</strong> ${file.type || "N/D"}<br>
-            <em>Per metadati avanzati (PDF/DOCX) serve parsing lato client o server.</em>
+            <em>Per metadati avanzati (PDF/DOCX) serve parsing dedicato.</em>
         </div>
     `;
 }
@@ -467,7 +599,7 @@ async function analyzeHeaders() {
     }
 }
 
-// --- FOOTPRINT (aggregato demo) ---
+// --- FOOTPRINT ---
 async function generateFootprint() {
     const domain = document.getElementById("footprintInput").value.trim();
     const div = document.getElementById("footprint-results");
@@ -484,13 +616,12 @@ async function generateFootprint() {
 
     let output = `<div class="result-item"><strong>Footprint per ${domain}:</strong><br>`;
 
-    // DNS base
     try {
-        const res = await fetch(`https://dns.google/resolve?name=${domain}`);
-        const data = await res.json();
+        const dnsRes = await fetch(`https://dns.google/resolve?name=${domain}`);
+        const dnsData = await dnsRes.json();
         output += "<br><strong>DNS:</strong><br>";
-        if (data.Answer) {
-            data.Answer.forEach(a => {
+        if (dnsData.Answer) {
+            dnsData.Answer.forEach(a => {
                 output += `${a.type} → ${a.data}<br>`;
             });
         } else {
@@ -500,13 +631,13 @@ async function generateFootprint() {
         output += "<br>Errore DNS.<br>";
     }
 
-    output += "<br><em>WHOIS, ASN, Reverse, ecc. possono essere integrati via backend.</em>";
+    output += "<br><em>WHOIS, ASN, Reverse, ecc. possono essere integrati lato backend per massima affidabilità.</em>";
     output += "</div>";
 
     div.innerHTML = output;
 }
 
-// --- REPORT (semplice aggregato HTML) ---
+// --- REPORT ---
 function generateReport() {
     const div = document.getElementById("report-results");
 
@@ -518,7 +649,7 @@ function generateReport() {
     div.innerHTML = `
         <div class="result-item">
             <strong>Report OSINT (snapshot):</strong><br>
-            <em>Questo è un report base generato lato client.</em><br><br>
+            <em>Report generato lato client.</em><br><br>
             <strong>Note:</strong><br>
             <pre>${notes || "Nessuna nota inserita."}</pre>
             <br>
@@ -531,6 +662,8 @@ function generateReport() {
             EXIF analyses: ${stats.exifAnalyses}<br>
             Unshort: ${stats.unshorts}<br>
             Hash calcs: ${stats.hashCalcs}<br>
+            Email analyses: ${stats.emailAnalyses}<br>
         </div>
     `;
 }
+
