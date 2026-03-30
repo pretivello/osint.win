@@ -267,9 +267,6 @@ function analyzeEmail() {
         return;
     }
 
-    stats.emailAnalyses++;
-    updateStats();
-
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const valid = regex.test(email);
     const domain = email.split("@")[1] || "N/D";
