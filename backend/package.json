@@ -6,11 +6,11 @@
     "start": "node server.js"
   },
   "dependencies": {
+    "cors": "^2.8.5",
     "express": "^4.18.2",
     "node-fetch": "^3.3.1",
-    "whois-json": "^2.2.0",
-    "portscanner": "^2.2.0",
-    "cors": "^2.8.5"
+    "portscanner": "2.2.0",
+    "whois-json": "^2.0.4"
   },
   "type": "module"
 }

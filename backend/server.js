@@ -67,4 +67,6 @@ app.get('/port', async (req, res) => {
     res.json(results);
 });
 
-app.listen(PORT, () => console.log(`Server OSINT in esecuzione su http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(`Server OSINT in esecuzione su http://localhost:${PORT}`));app.get('/', (req, res) => {
+    res.send('OSINT backend attivo 🚀');
+});
