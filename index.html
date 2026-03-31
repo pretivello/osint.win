@@ -2,176 +2,145 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <title>OSINT.WIN</title>
-    <link rel="stylesheet" href="style.css">
+    <title>OSINT Tool v2</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #0d1117;
+            color: #e6edf3;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+        }
+
+        .box {
+            background: #161b22;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+        }
+
+        input, button {
+            padding: 10px;
+            margin-top: 10px;
+            width: 100%;
+            border-radius: 6px;
+            border: none;
+            font-size: 14px;
+        }
+
+        input {
+            background: #0d1117;
+            color: white;
+            border: 1px solid #30363d;
+        }
+
+        button {
+            background: #238636;
+            color: white;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #2ea043;
+        }
+
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            background: #0d1117;
+            border-radius: 6px;
+            border: 1px solid #30363d;
+        }
+
+        .title {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+    </style>
 </head>
 <body>
 
-    <div class="menu">
-        <div class="links">
-            <a href="#username">Username</a>
-            <a href="#domain">Dominio</a>
-            <a href="#ip">IP</a>
-            <a href="#dns">DNS</a>
-            <a href="#whois">WHOIS</a>
-            <a href="#asn">ASN</a>
-            <a href="#reverse">Reverse DNS</a>
-            <a href="#email">Email</a>
-            <a href="#ports">Porte</a>
-            <a href="#exif">EXIF</a>
-            <a href="#filemeta">FileMeta</a>
-            <a href="#unshort">Unshort</a>
-            <a href="#hash">Hash</a>
-            <a href="#headers">Headers</a>
-            <a href="#footprint">Footprint</a>
-            <a href="#notes">Note</a>
-            <a href="#report">Report</a>
-            <a href="#stats">Stats</a>
-        </div>
+<div class="container">
+
+    <h1>🧠 OSINT Tool v2</h1>
+
+    <!-- IP LOOKUP -->
+    <div class="box">
+        <div class="title">🌍 IP Lookup</div>
+        <input id="ipInput" placeholder="Es. 8.8.8.8">
+        <button onclick="lookupIP()">Analizza IP</button>
+        <div id="ipResult" class="result"></div>
     </div>
 
-    <!-- USERNAME -->
-    <section id="username">
-        <h2>Ricerca Username</h2>
-        <input type="text" id="usernameInput" placeholder="Inserisci username">
-        <button onclick="scan()">Scansiona</button>
-        <div id="results"></div>
-    </section>
-
-    <!-- DOMINIO -->
-    <section id="domain">
-        <h2>Analisi Dominio</h2>
-        <input type="text" id="domainInput" placeholder="Inserisci dominio (es. google.com)">
-        <button onclick="scanDomain()">Analizza</button>
-        <div id="domain-results"></div>
-    </section>
-
-    <!-- IP -->
-    <section id="ip">
-        <h2>IP Lookup</h2>
-        <input type="text" id="ipInput" placeholder="Inserisci IP (es. 1.1.1.1)">
-        <button onclick="lookupIP()">Cerca IP</button>
-        <div id="ip-results"></div>
-    </section>
-
     <!-- DNS -->
-    <section id="dns">
-        <h2>DNS Lookup</h2>
-        <input type="text" id="dnsInput" placeholder="Inserisci dominio (es. google.com)">
-        <button onclick="lookupDNS()">Cerca DNS</button>
-        <div id="dns-results"></div>
-    </section>
-
-    <!-- WHOIS -->
-    <section id="whois">
-        <h2>WHOIS</h2>
-        <input type="text" id="whoisInput" placeholder="Inserisci dominio (es. google.com)">
-        <button onclick="lookupWHOIS()">Cerca WHOIS</button>
-        <div id="whois-results"></div>
-    </section>
-
-    <!-- ASN -->
-    <section id="asn">
-        <h2>ASN Lookup</h2>
-        <input type="text" id="asnInput" placeholder="Inserisci IP (es. 1.1.1.1)">
-        <button onclick="lookupASN()">Cerca ASN</button>
-        <div id="asn-results"></div>
-    </section>
-
-    <!-- REVERSE DNS -->
-    <section id="reverse">
-        <h2>Reverse DNS</h2>
-        <input type="text" id="reverseInput" placeholder="Inserisci IP (es. 1.1.1.1)">
-        <button onclick="lookupReverseDNS()">Cerca Reverse</button>
-        <div id="reverse-results"></div>
-    </section>
+    <div class="box">
+        <div class="title">🌐 DNS Lookup</div>
+        <input id="dnsInput" placeholder="Es. google.com">
+        <button onclick="lookupDNS()">Analizza DNS</button>
+        <div id="dnsResult" class="result"></div>
+    </div>
 
     <!-- EMAIL -->
-    <section id="email">
-        <h2>Email OSINT</h2>
-        <input type="text" id="emailInput" placeholder="Inserisci email (es. test@example.com)">
+    <div class="box">
+        <div class="title">📧 Email Analysis</div>
+        <input id="emailInput" placeholder="Es. test@gmail.com">
         <button onclick="analyzeEmail()">Analizza Email</button>
-        <div id="email-results"></div>
-    </section>
-
-    <!-- PORTE -->
-    <section id="ports">
-        <h2>Port Scanner (HTTP/HTTPS)</h2>
-        <input type="text" id="portsHostInput" placeholder="Inserisci host (es. https://example.com)">
-        <button onclick="scanPorts()">Scansiona Porte</button>
-        <div id="ports-results"></div>
-    </section>
-
-    <!-- EXIF -->
-    <section id="exif">
-        <h2>Analisi EXIF</h2>
-        <input type="file" id="imageInput" accept="image/*">
-        <button onclick="analyzeImage()">Analizza immagine</button>
-        <div id="image-results"></div>
-    </section>
-
-    <!-- FILE META -->
-    <section id="filemeta">
-        <h2>File Metadata (PDF/DOCX)</h2>
-        <input type="file" id="fileMetaInput">
-        <button onclick="analyzeFileMeta()">Analizza File</button>
-        <div id="filemeta-results"></div>
-    </section>
-
-    <!-- UNSHORT -->
-    <section id="unshort">
-        <h2>Unshort URL</h2>
-        <input type="text" id="unshortInput" placeholder="Inserisci URL accorciato">
-        <button onclick="unshortURL()">Espandi</button>
-        <div id="unshort-results"></div>
-    </section>
+        <div id="emailResult" class="result"></div>
+    </div>
 
     <!-- HASH -->
-    <section id="hash">
-        <h2>Calcolo Hash</h2>
-        <textarea id="hashInput" placeholder="Inserisci testo o stringa"></textarea>
-        <button onclick="calcHash()">Calcola Hash</button>
-        <div id="hash-results"></div>
-    </section>
+    <div class="box">
+        <div class="title">🔐 Hash Generator (SHA-256)</div>
+        <input id="hashInput" placeholder="Inserisci testo">
+        <button onclick="calcHash()">Genera Hash</button>
+        <div id="hashResult" class="result"></div>
+    </div>
 
-    <!-- HEADERS -->
-    <section id="headers">
-        <h2>Analisi Headers HTTP</h2>
-        <input type="text" id="headersInput" placeholder="Inserisci URL (https://...)">
-        <button onclick="analyzeHeaders()">Analizza</button>
-        <div id="headers-results"></div>
-    </section>
+    <!-- EXIF -->
+    <div class="box">
+        <div class="title">🖼️ EXIF Analyzer</div>
+        <input type="file" id="imageInput">
+        <button onclick="analyzeImage()">Analizza immagine</button>
+        <div id="imageResult" class="result"></div>
+    </div>
 
-    <!-- FOOTPRINT -->
-    <section id="footprint">
-        <h2>Footprint</h2>
-        <input type="text" id="footprintInput" placeholder="Inserisci dominio (es. google.com)">
-        <button onclick="generateFootprint()">Genera Footprint</button>
-        <div id="footprint-results"></div>
-    </section>
+    <!-- BACKEND FEATURES -->
+    <div class="box">
+        <div class="title">⚙️ Backend Tools (richiede server)</div>
 
-    <!-- NOTE -->
-    <section id="notes">
-        <h2>Note</h2>
-        <textarea id="notesInput" placeholder="Annotazioni indagine..."></textarea>
-    </section>
+        <input id="domainInput" placeholder="Dominio (WHOIS)">
+        <button onclick="whoisLookup()">WHOIS (server)</button>
 
-    <!-- REPORT -->
-    <section id="report">
-        <h2>Report</h2>
-        <button onclick="generateReport()">Genera Report</button>
-        <div id="report-results"></div>
-    </section>
+        <input id="usernameInput" placeholder="Username">
+        <button onclick="usernameScan()">Username Scan (server)</button>
 
-    <!-- STATS -->
-    <section id="stats">
-        <h2>Stats</h2>
-        <div id="stats-results"></div>
-    </section>
+        <input id="portInput" placeholder="Host (es. example.com)">
+        <button onclick="portScan()">Port Scan (server)</button>
 
-    <script src="script.js"></script>
+        <div id="backendResult" class="result"></div>
+    </div>
+
+</div>
+
+<!-- EXIF LIB -->
+<script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
+
+<!-- SCRIPT -->
+<script src="script.js"></script>
+
 </body>
 </html>
-
 
 
