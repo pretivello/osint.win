@@ -60,3 +60,26 @@ footer {
     border-top: 2px solid #a3ff00;
     margin-top: 40px;
 }
+input, button {
+    background-color: black;
+    border: 1px solid #a3ff00;
+    color: #a3ff00;
+    padding: 10px;
+    font-family: monospace;
+    margin-top: 10px;
+}
+
+button:hover {
+    background-color: #a3ff00;
+    color: black;
+    cursor: pointer;
+}
+
+pre {
+    background-color: black;
+    padding: 15px;
+    border: 1px solid #a3ff00;
+    margin-top: 20px;
+    min-height: 150px;
+    overflow-x: auto;
+}
