@@ -167,3 +167,29 @@ function portScan() {
     setResult("backendResult", "⚠️ Port scanning reale NON possibile via browser");
 }
 
+async function whoisLookup() {
+    const domain = document.getElementById("domainInput").value;
+
+    const res = await fetch(`http://localhost:3000/whois?domain=${domain}`);
+    const data = await res.json();
+
+    setResult("backendResult", JSON.stringify(data, null, 2));
+}
+
+async function usernameScan() {
+    const username = document.getElementById("usernameInput").value;
+
+    const res = await fetch(`http://localhost:3000/username?username=${username}`);
+    const data = await res.json();
+
+    setResult("backendResult", JSON.stringify(data, null, 2));
+}
+
+async function portScan() {
+    const host = document.getElementById("portInput").value;
+
+    const res = await fetch(`http://localhost:3000/port?host=${host}`);
+    const data = await res.json();
+
+    setResult("backendResult", JSON.stringify(data, null, 2));
+}
