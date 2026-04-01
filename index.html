@@ -4,7 +4,95 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OSINTWin</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Stile hacker OSINTWin */
+        body {
+            background-color: #000000; /* nero totale */
+            color: #00FF00; /* verde lime */
+            font-family: 'Courier New', Courier, monospace;
+            margin: 0;
+            padding: 20px;
+        }
+
+        header, footer {
+            text-align: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #00FF00;
+        }
+
+        footer {
+            border-top: 1px solid #00FF00;
+            border-bottom: none;
+            margin-top: 20px;
+        }
+
+        h1, h2, h3 {
+            color: #00FF00;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            padding: 0;
+        }
+
+        nav ul li {
+            margin: 0 15px;
+        }
+
+        nav ul li a {
+            color: #00FF00;
+            text-decoration: none;
+            transition: 0.2s;
+        }
+
+        nav ul li a:hover {
+            color: #000;
+            background-color: #00FF00;
+            padding: 3px 6px;
+        }
+
+        input[type="text"] {
+            background-color: #111;
+            color: #00FF00;
+            border: 1px solid #00FF00;
+            padding: 10px;
+            width: 250px;
+            font-family: monospace;
+            margin-right: 10px;
+        }
+
+        button {
+            background-color: #111;
+            color: #00FF00;
+            border: 1px solid #00FF00;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-family: monospace;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            background-color: #00FF00;
+            color: #000;
+        }
+
+        pre {
+            background-color: #111;
+            color: #00FF00;
+            border: 1px solid #00FF00;
+            padding: 15px;
+            overflow-x: auto;
+            max-height: 400px;
+            margin-top: 10px;
+        }
+
+        section {
+            margin: 30px auto;
+            max-width: 600px;
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -13,29 +101,63 @@
         <nav>
             <ul>
                 <li><a href="#">Home</a></li>
-                <li><a href="#">Username Scan</a></li>
-                <li><a href="#">Domain Lookup</a></li>
-                <li><a href="#">Email Analysis</a></li>
-                <li><a href="#">Port Scan</a></li>
+                <li><a href="#tools">Username Scan</a></li>
+                <li><a href="#domainLookup">Domain Lookup</a></li>
+                <li><a href="#emailAnalysis">Email Analysis</a></li>
+                <li><a href="#portScan">Port Scan</a></li>
+                <li><a href="#ipLookup">IP Lookup</a></li>
             </ul>
         </nav>
     </header>
+
     <main>
         <section>
             <h2>Benvenuto su OSINTWin</h2>
             <p>Qui troverai strumenti di OSINT seri, pronti a scansionare e raccogliere informazioni. ⚡</p>
         </section>
-        <section id="tools">
-    <h2>Username Scanner</h2>
-    <input type="text" id="usernameInput" placeholder="Inserisci username">
-    <button onclick="scanUsername()">Scansiona</button>
-    <pre id="result"></pre>
-</section>
 
-<script src="script.js"></script>
+        <!-- Username Scanner -->
+        <section id="tools">
+            <h2>Username Scanner</h2>
+            <input type="text" id="usernameInput" placeholder="Inserisci username">
+            <button onclick="scanUsername()">Scansiona</button>
+            <pre id="result"></pre>
+        </section>
+
+        <!-- IP Lookup -->
+        <section id="ipLookup">
+            <h2>IP Lookup</h2>
+            <input type="text" id="ipInput" placeholder="Inserisci IP">
+            <button id="lookupBtn">Cerca IP</button>
+            <pre id="ipResult"></pre>
+        </section>
     </main>
+
     <footer>
         <p>© 2026 OSINTWin. Tutti i diritti riservati.</p>
     </footer>
+
+    <script>
+        // Username scanner placeholder
+        function scanUsername() {
+            const username = document.getElementById("usernameInput").value;
+            if (!username) return alert("Inserisci uno username");
+            document.getElementById("result").textContent = `Risultati per ${username}:\n[Simulazione OSINT]`;
+        }
+
+        // IP Lookup reale collegato al backend
+        document.getElementById("lookupBtn").addEventListener("click", async () => {
+            const ip = document.getElementById("ipInput").value;
+            if (!ip) return alert("Inserisci un IP");
+
+            try {
+                const res = await fetch(`http://localhost:3000/ip/${ip}`);
+                const data = await res.json();
+                document.getElementById("ipResult").textContent = JSON.stringify(data, null, 2);
+            } catch (err) {
+                document.getElementById("ipResult").textContent = "Errore nel contattare il backend";
+            }
+        });
+    </script>
 </body>
 </html>
